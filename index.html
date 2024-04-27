@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>three.js webgl - buffergeometry - particles</title>
+		<title>Curl and Divergence Visualization</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<link type="text/css" rel="stylesheet" href="main.css">
 	</head>
 	<body>
 
+		<div><p>\(\displaystyle \vec F = \left( {3x + 2{z^2}} \right)\,\vec i + \frac{{{x^3}{y^2}}}{z}\vec j - \left( {z - 7x} \right)\vec k\)
+		<p>\({\rm div} \vec F = {{2 + \frac{{2{x^3}y}}{z}}}\)
+		<p>\({\rm curl}\vec F = {{\frac{{{x^3}{y^2}}}{{{z^2}}}\vec i + \left( {4z - 7} \right)\vec j + \frac{{3{x^2}{y^2}}}{z}\vec k}}\)
+		</div>
 		<div id="container"></div>
-		<div id="info"><a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - buffergeometry - particles</div>
 
+		<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML-full"></script>
 		<script type="importmap">
 			{
 				"imports": {
@@ -23,89 +26,83 @@
 
 			import * as THREE from 'three';
 
-			let container;
+			import { OrbitControls } from './OrbitControls.js';
 
-			let camera, scene, renderer;
-
-			let points;
+			let group, camera, scene, renderer;
+			let effectController;
+			let materials, current_material;
 
 			init();
 			animate();
 
 			function init() {
 
-				container = document.getElementById( 'container' );
-
-				//
-
-				camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 3500 );
-				camera.position.z = 2750;
-
 				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0x050505 );
-				scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
 
-				//
-
-				const particles = 500000;
-
-				const geometry = new THREE.BufferGeometry();
-
-				const positions = [];
-				const colors = [];
-
-				const color = new THREE.Color();
-
-				const n = 1000, n2 = n / 2; // particles spread in the cube
-
-				for ( let i = 0; i < particles; i ++ ) {
-
-					// positions
-
-					const x = Math.random() * n - n2;
-					const y = Math.random() * n - n2;
-					const z = Math.random() * n - n2;
-
-					positions.push( x, y, z );
-
-					// colors
-
-					const vx = ( x / n ) + 0.5;
-					const vy = ( y / n ) + 0.5;
-					const vz = ( z / n ) + 0.5;
-
-					color.setRGB( vx, vy, vz, THREE.SRGBColorSpace );
-
-					colors.push( color.r, color.g, color.b );
-
-				}
-
-				geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-				geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
-
-				geometry.computeBoundingSphere();
-
-				//
-
-				const material = new THREE.PointsMaterial( { size: 15, vertexColors: true } );
-
-				points = new THREE.Points( geometry, material );
-				scene.add( points );
-
-				//
-
-				renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
 
-				container.appendChild( renderer.domElement );
+				// camera
 
-				//
+				camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 1000 );
+				camera.position.set( 15, 20, 30 );
+				scene.add( camera );
+
+				// controls
+
+				const controls = new OrbitControls( camera, renderer.domElement );
+				controls.minDistance = 20;
+				controls.maxDistance = 50;
+				controls.maxPolarAngle = Math.PI / 2;
+
+				// ambient light
+
+				scene.add( new THREE.AmbientLight( 0x666666 ) );
+
+				// point light
+
+				const light = new THREE.PointLight( 0xffffff, 3, 0, 0 );
+				camera.add( light );
+
+				// helper
+
+				scene.add( new THREE.AxesHelper( 20 ) );
+
+				group = new THREE.Group();
+				scene.add( group );
+				
+				const dimension = 4
+				
+				for ( let x = -dimension; x < dimension; x++) {
+				for ( let y = -dimension; y < dimension; y++) {
+				for ( let z = -dimension; z < dimension; z++) {
+				
+					let i = x**3*y**3/z**2
+					let j = 4*x-7
+					let k = 3*x**2*y**2/z
+				
+					const dir = new THREE.Vector3( i, j, k );
+
+					//normalize the direction vector (convert to vector of length 1)
+					dir.normalize();
+
+					const origin = new THREE.Vector3( x, y, z );
+					const length = (0.01)*(2 + 2*x**3*y/z);
+					const hex = 0xffff00;
+
+					const arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex );
+					group.add( arrowHelper );				
+				
+				}}}
+
+				// EVENTS
 
 				window.addEventListener( 'resize', onWindowResize );
 
 			}
-
+			
 			function onWindowResize() {
 
 				camera.aspect = window.innerWidth / window.innerHeight;
@@ -115,22 +112,17 @@
 
 			}
 
-			//
-
 			function animate() {
 
 				requestAnimationFrame( animate );
+
+				group.rotation.y += 0.005;
 
 				render();
 
 			}
 
 			function render() {
-
-				const time = Date.now() * 0.001;
-
-				points.rotation.x = time * 0.25;
-				points.rotation.y = time * 0.5;
 
 				renderer.render( scene, camera );
 
