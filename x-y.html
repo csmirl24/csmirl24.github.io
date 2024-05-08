@@ -6,10 +6,10 @@
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	</head>
 	<body>
-		<a href="1.html">Next</a><p><a href="7.html">Previous</a>
-		<div><p>\(\displaystyle \vec F = {cos(x)} \vec i + {sinx(x)} \vec j\)
-		<p>\({\rm div} \vec F = -sin(x)\)
-		<p>\({\rm curl}\vec F = 0 \vec i + 0 \vec j + cos(x) \vec k\)
+
+		<div><p>\(\displaystyle \vec F = x \vec i + -y \vec j\)
+		<p>\({\rm div} \vec F = 0\)
+		<p>\({\rm curl}\vec F = 0 \vec i + 0 \vec j + 0 \vec k\)
 		</div>
 		<div id="container"></div>
 
@@ -73,13 +73,13 @@
 				group = new THREE.Group();
 				scene.add( group );
 				
-				const dimension = 8
+				const dimension = 5
 				
-				for ( let x = -dimension; x <= dimension; x = x + 0.75) {
-				for ( let y = -dimension; y <= dimension; y = y + 0.75) {
+				for ( let x = -dimension; x <= dimension; x++) {
+				for ( let y = -dimension; y <= dimension; y++) {
 				
-					let i = Math.cos(x)
-					let j = Math.sin(x)
+					let i = x
+					let j = -y
 					let k = 0
 				
 					const dir = new THREE.Vector3( i, j, k );
@@ -88,9 +88,9 @@
 					dir.normalize();
 
 					const origin = new THREE.Vector3( x, y, 0 );
-					const length = (i**2 + j**2 + k**2)**0.5
+					const length = (0.2)*(i**2 + j**2 + k**2)**0.5
 					
-					const div = -Math.sin(x)
+					const div = 2
 					
 					let red = 0xff;
 					let green = 0xff;
@@ -107,9 +107,9 @@
 					
 					let ci = 0
 					let cj = 0
-					let ck = Math.cos(x)
+					let ck = 0
 					const curl = new THREE.Vector3( ci, cj, ck );
-					const clength = (ci**2 + cj**2 + ck**2)**0.5
+					const clength = 0.1*Math.log((ci**2 + cj**2 + ck**2)**0.5)
 				
 					const carrowHelper = new THREE.ArrowHelper( curl, origin, clength, 0xFFFFFF );
 					group.add( carrowHelper );				

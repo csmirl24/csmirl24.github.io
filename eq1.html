@@ -6,10 +6,10 @@
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	</head>
 	<body>
-		<a href="1.html">Next</a><p><a href="7.html">Previous</a>
-		<div><p>\(\displaystyle \vec F = {cos(x)} \vec i + {sinx(x)} \vec j\)
-		<p>\({\rm div} \vec F = -sin(x)\)
-		<p>\({\rm curl}\vec F = 0 \vec i + 0 \vec j + cos(x) \vec k\)
+
+		<div><p>\(\displaystyle \vec F = \left( {3x + 2{z^2}} \right)\,\vec i + \frac{{{x^3}{y^2}}}{z}\vec j - \left( {z - 7x} \right)\vec k\)
+		<p>\({\rm div} \vec F = {{2 + \frac{{2{x^3}y}}{z}}}\)
+		<p>\({\rm curl}\vec F = {{\frac{{{x^3}{y^2}}}{{{z^2}}}\vec i + \left( {4z - 7} \right)\vec j + \frac{{3{x^2}{y^2}}}{z}\vec k}}\)
 		</div>
 		<div id="container"></div>
 
@@ -73,24 +73,25 @@
 				group = new THREE.Group();
 				scene.add( group );
 				
-				const dimension = 8
+				const dimension = 4.5
 				
-				for ( let x = -dimension; x <= dimension; x = x + 0.75) {
-				for ( let y = -dimension; y <= dimension; y = y + 0.75) {
+				for ( let x = -dimension; x <= dimension; x++) {
+				for ( let y = -dimension; y <= dimension; y++) {
+				for ( let z = -dimension; z <= dimension; z++) {
 				
-					let i = Math.cos(x)
-					let j = Math.sin(x)
-					let k = 0
+					let i = 3*x + 2*z**2
+					let j = (x**3 + y**2) / z
+					let k = z - 7*x
 				
 					const dir = new THREE.Vector3( i, j, k );
 
 					//normalize the direction vector (convert to vector of length 1)
 					dir.normalize();
 
-					const origin = new THREE.Vector3( x, y, 0 );
-					const length = (i**2 + j**2 + k**2)**0.5
+					const origin = new THREE.Vector3( x, y, z );
+					const length = (0.02)*(i**2 + j**2 + k**2)**0.5
 					
-					const div = -Math.sin(x)
+					const div = 2 + 2*x**3*y/z
 					
 					let red = 0xff;
 					let green = 0xff;
@@ -105,15 +106,15 @@
 					const arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex );
 					group.add( arrowHelper );	
 					
-					let ci = 0
-					let cj = 0
-					let ck = Math.cos(x)
+					let ci = x**3*y**2/z**2
+					let cj = 4*z - 7
+					let ck = 3*x**2*y**2/z			
 					const curl = new THREE.Vector3( ci, cj, ck );
-					const clength = (ci**2 + cj**2 + ck**2)**0.5
+					const clength = 0.1*Math.log((ci**2 + cj**2 + ck**2)**0.5)
 				
 					const carrowHelper = new THREE.ArrowHelper( curl, origin, clength, 0xFFFFFF );
 					group.add( carrowHelper );				
-				}}
+				}}}
 
 				// EVENTS
 
